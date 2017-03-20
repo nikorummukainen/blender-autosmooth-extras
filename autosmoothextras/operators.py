@@ -3,6 +3,8 @@ import bpy
 import bmesh
 from bpy.props import FloatProperty, StringProperty, EnumProperty, BoolProperty
 
+def __edgelistbyangle(self, angle):
+
 class MarkSharps(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_sharps"
     bl_label = "Mark Sharps"
@@ -24,7 +26,7 @@ class MarkSharps(bpy.types.Operator):
             bm = bmesh.new()
             bm.from_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
+                if edge.calc_face_angle() >= asa:
                     edge.smooth = False
                 else :pass            
             bm.to_mesh(md)
@@ -32,7 +34,7 @@ class MarkSharps(bpy.types.Operator):
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
+                if edge.calc_face_angle() >= asa:
                     edge.smooth = False
                 else :pass            
             bmesh.update_edit_mesh(md)
@@ -40,16 +42,17 @@ class MarkSharps(bpy.types.Operator):
         bm.free()
         return {"FINISHED"}
 
-class MarkBewelWeights(bpy.types.Operator):
-    bl_idname = "mesh.auto_smooth_mark_bewelweights"
+class MarkEdgeCrease(bpy.types.Operator):
+    bl_idname = "mesh.auto_smooth_mark_edgecrease"
     bl_label = "Auto Smooth Extras"
-    bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Edge Grease by auto smooth angle"
+    bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Edge Crease by auto smooth angle"
     bl_options = {"INTERNAL", "UNDO"}
-    grease_concave = BoolProperty (name='Grease Concave', default=True)
-    grease_convex = BoolProperty(name='Grease Convex', default=True)        
-    grease_fallof_max = FloatProperty(name='Edge grease max',description='Edge grease max value',  default=0.766, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
-    grease_fallof_min = FloatProperty(name='Edge grease min',description='Edge grease min value',  default=0.333, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
-    grease_fallof_type = EnumProperty(
+    crease_value = FloatProperty(name='Edge Crease', description='Edge crease value', default=1.0, min=0.0, max=1.0)
+    crease_concave = BoolProperty (name='Crease Concave', default=True)
+    crease_convex = BoolProperty(name='Crease Convex', default=True)        
+    crease_fallof_max = FloatProperty(name='Edge crease max',description='Edge crease max value',  default=0.766, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
+    crease_fallof_min = FloatProperty(name='Edge crease min',description='Edge crease min value',  default=0.333, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
+    crease_fallof_type = EnumProperty(
         items=(
         ('RANDOM', 'Random', 'set falloff to random'), 
         ('CONSTANT', 'Constant', 'set falloff to constant'),
@@ -59,7 +62,7 @@ class MarkBewelWeights(bpy.types.Operator):
         ('ROOT', 'Root', 'set texturesize to root'),
         ('SPHERE', 'Sphere', 'set falloff to sphere'),
         ('SMOOTH', 'Smooth', 'set falloff to smooth'),
-        ), name = "Edge grease falloff", default = 'LINEAR'
+        ), name = "Edge crease falloff", default = 'LINEAR'
     )
 
     @classmethod
@@ -71,35 +74,37 @@ class MarkBewelWeights(bpy.types.Operator):
         obj = bpy.context.active_object
         asa = obj.data.auto_smooth_angle
         md = obj.data
+        key = bm.edges.layers.bevel_weight.verify()
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
-                    edge.smooth = False
+                if edge.calc_face_angle() >= asa:
+                    edge[key] = self.crease_value
                 else :pass            
             bm.to_mesh(md)
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
-                    edge.smooth = False
+                if edge.calc_face_angle() >= asa:
+                    edge[key] = self.crease_value
                 else :pass            
             bmesh.update_edit_mesh(md)
         
         bm.free()
         return {"FINISHED"}    
   
-class MarkEdgeGrease(bpy.types.Operator):
-    bl_idname = "mesh.auto_smooth_mark_edgegrease"
+class MarkBewelWeights(bpy.types.Operator):
+    bl_idname = "mesh.auto_smooth_mark_bewelweights"
     bl_label = "Auto Smooth Extras"
     bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Bewel Weight by auto smooth angle"
     bl_options = {"INTERNAL", "UNDO"}
+    bevel_weight = FloatProperty(name='Bevel Weight', description='Bevel weight value', default=1.0, min=0.0, max=1.0)
     bevel_concave = BoolProperty (name='Bevel Concave', default=True)
     bevel_convex = BoolProperty(name='Bevel Convex', default=True)    
-    bevel_fallof_max = FloatProperty(name='Bevel weight max', description='Bevel weight max value',default=0.766, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
-    bevel_fallof_min = FloatProperty(name='Bevel weight min', description='Bevel weight min valuee',default=0.333, min=0.0, max=1.000, soft_min=0.0, soft_max=1.000)
+    bevel_fallof_max = FloatProperty(name='Bevel weight max', description='Bevel weight max value',default=0.766, min=0.0, max=1.0, soft_min=0.0, soft_max=1.0)
+    bevel_fallof_min = FloatProperty(name='Bevel weight min', description='Bevel weight min value',default=0.333, min=0.0, max=1.0, soft_min=0.0, soft_max=1.0)
     bevel_fallof = EnumProperty(
         items=(
         ('RANDOM', 'Random', 'set falloff to random'), 
@@ -122,20 +127,21 @@ class MarkEdgeGrease(bpy.types.Operator):
         obj = bpy.context.active_object
         asa = obj.data.auto_smooth_angle
         md = obj.data
+        key = bm.edges.layers.bevel_weight.verify()
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
-                    edge.smooth = False
+                if edge.calc_face_angle() >= asa:
+                    edge[key] = self.bevel_weight
                 else :pass            
             bm.to_mesh(md)
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
             for edge in bm.edges:
-                if edge.calc_face_angle(None) >= asa:
-                    edge.smooth = False
+                if edge.calc_face_angle() >= asa:
+                    edge[key] = self.bevel_weight
                 else :pass            
             bmesh.update_edit_mesh(md)
         
