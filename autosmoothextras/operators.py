@@ -6,7 +6,7 @@ from bpy.props import FloatProperty, StringProperty, EnumProperty, BoolProperty
 class MarkSharps(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_sharps"
     bl_label = "Mark Sharps"
-    bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Sharp edges, Bewel weights 6 Edge greasing by auto smooth angle"
+    bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Sharp edges by auto smooth angle"
     bl_options = {"INTERNAL", "UNDO"}
     sharpen_concave = BoolProperty (name='Sharpen Concave', default=True)
     sharpen_convex = BoolProperty(name='Sharpen Convex', default=True)
@@ -61,7 +61,36 @@ class MarkBewelWeights(bpy.types.Operator):
         ('SMOOTH', 'Smooth', 'set falloff to smooth'),
         ), name = "Edge grease falloff", default = 'LINEAR'
     )
-    
+
+    @classmethod
+    def poll(cls, context):
+           return True
+
+    def execute(self, context):
+        '''create bmesh representation of active object and calculate sharp edges based on angle of autosmooth and face angles'''
+        obj = bpy.context.active_object
+        asa = obj.data.auto_smooth_angle
+        md = obj.data
+        if 'OBJECT' in obj.mode:
+            bm = bmesh.new()
+            bm.from_mesh(md)
+            for edge in bm.edges:
+                if edge.calc_face_angle(None) >= asa:
+                    edge.smooth = False
+                else :pass            
+            bm.to_mesh(md)
+            
+        elif 'EDIT' in obj.mode:
+            bm = bmesh.from_edit_mesh(md)
+            for edge in bm.edges:
+                if edge.calc_face_angle(None) >= asa:
+                    edge.smooth = False
+                else :pass            
+            bmesh.update_edit_mesh(md)
+        
+        bm.free()
+        return {"FINISHED"}    
+  
 class MarkEdgeGrease(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_edgegrease"
     bl_label = "Auto Smooth Extras"
@@ -84,6 +113,34 @@ class MarkEdgeGrease(bpy.types.Operator):
         ), name = "Bevel weight falloff type", default = 'LINEAR'
     )
 
+    @classmethod
+    def poll(cls, context):
+           return True
+
+    def execute(self, context):
+        '''create bmesh representation of active object and calculate sharp edges based on angle of autosmooth and face angles'''
+        obj = bpy.context.active_object
+        asa = obj.data.auto_smooth_angle
+        md = obj.data
+        if 'OBJECT' in obj.mode:
+            bm = bmesh.new()
+            bm.from_mesh(md)
+            for edge in bm.edges:
+                if edge.calc_face_angle(None) >= asa:
+                    edge.smooth = False
+                else :pass            
+            bm.to_mesh(md)
+            
+        elif 'EDIT' in obj.mode:
+            bm = bmesh.from_edit_mesh(md)
+            for edge in bm.edges:
+                if edge.calc_face_angle(None) >= asa:
+                    edge.smooth = False
+                else :pass            
+            bmesh.update_edit_mesh(md)
+        
+        bm.free()
+        return {"FINISHED"}
       
 if __name__ == '__main__':
     def register():
