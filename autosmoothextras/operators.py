@@ -26,21 +26,26 @@ class MarkSharps(bpy.types.Operator):
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
+            bm.edges.ensure_lookup_table()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge.smooth = False
                 else :pass            
             bm.to_mesh(md)
+            bm.free()
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
+            bm.edges.ensure_lookup_table()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge.smooth = False
-                else :pass            
+                else :pass
+            bm.edges.ensure_lookup_table()         
             bmesh.update_edit_mesh(md)
         
-        bm.free()
+        if md.use_auto_smooth is False:
+            md.use_auto_smooth = True
         return {"FINISHED"}
 
 class MarkEdgeCrease(bpy.types.Operator):
@@ -79,23 +84,26 @@ class MarkEdgeCrease(bpy.types.Operator):
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
+            bm.edges.ensure_lookup_table()
             key = bm.edges.layers.crease.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.crease_value
-                else :pass            
+                else :pass
+            bm.edges.ensure_lookup_table()
             bm.to_mesh(md)
+            bm.free()
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
+            bm.edges.ensure_lookup_table()
             key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.crease_value
-                else :pass            
+                else :pass         
             bmesh.update_edit_mesh(md)
-        
-        bm.free()
+            md.update()
         return {"FINISHED"}    
   
 class MarkBewelWeights(bpy.types.Operator):
@@ -133,23 +141,26 @@ class MarkBewelWeights(bpy.types.Operator):
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
+            bm.edges.ensure_lookup_table()
             key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.bevel_weight
-                else :pass            
-            bm.to_mesh(md)
+                else :pass
+            bm.edges.ensure_lookup_table()
+            bm.to_mesh(md)                   
+            bm.free()
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
+            bm.edges.ensure_lookup_table()
             key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.bevel_weight
-                else :pass            
+                else :pass
             bmesh.update_edit_mesh(md)
-        
-        bm.free()
+            md.update()
         return {"FINISHED"}
       
 if __name__ == '__main__':
