@@ -28,7 +28,7 @@ except Exception as e:
 	print(str(e))
 	class Singleton_updater_none(object):
 		def __init__(self):
-			self.addon = None
+			self.addon = "Auto Smooth Extras"
 			self.verbose = False
 			self.invalidupdater = True # used to distinguish bad install
 			self.error = None
@@ -41,7 +41,7 @@ except Exception as e:
 # Must declare this before classes are loaded
 # otherwise the bl_idnames will not match and have errors.
 # Must be all lowercase and no spaces
-updater.addon = "addon_updater_demo"
+updater.addon = "auto_smooth_extras"
 
 
 # -----------------------------------------------------------------------------
@@ -827,15 +827,15 @@ def register(bl_info):
 	# print("Running updater reg")
 
 	# choose your own username
-	updater.user = "cgcookie"
+	updater.user = "nikorummukainen"
 
 	# choose your own repository, must match github name
-	updater.repo = "blender-addon-updater"
+	updater.repo = "blender-autosmooth-extras"
 
 	#updater.addon = # define at top of module, must be done first
 
 	# Website for manual addon download, optional 
-	updater.website = "https://github.com/CGCookie/blender-addon-updater/"
+	updater.website = "https://github.com/nikorummukainen/blender-autosmooth-extras"
 	
 	# used to check/compare versions
 	updater.current_version = bl_info["version"] 
