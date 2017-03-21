@@ -23,15 +23,17 @@ class AutoSmoothExtras(bpy.types.Panel):
             r = layout.row()
             r.prop(d, "auto_smooth_angle")            
             r.operator("mesh.auto_smooth_mark_sharps")
-        
+            r = layout.row()
+            r.operator("mesh.auto_smooth_mark_edgecrease")
+            r = layout.row()
+            r.operator("mesh.auto_smooth_mark_bewelweights")
 
 if __name__ == '__main__':
-    import bpy
     
     def register():
         try: bpy.utils.register_module(__name__)
         except: traceback.print_exc()
-
+        
         print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
 
     def unregister():

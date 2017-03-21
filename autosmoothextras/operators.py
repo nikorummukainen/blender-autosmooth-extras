@@ -4,6 +4,7 @@ import bmesh
 from bpy.props import FloatProperty, StringProperty, EnumProperty, BoolProperty
 
 def __edgelistbyangle(self, angle):
+    pass
 
 class MarkSharps(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_sharps"
@@ -44,7 +45,7 @@ class MarkSharps(bpy.types.Operator):
 
 class MarkEdgeCrease(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_edgecrease"
-    bl_label = "Auto Smooth Extras"
+    bl_label = "Mark Edge Crease"
     bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Edge Crease by auto smooth angle"
     bl_options = {"INTERNAL", "UNDO"}
     crease_value = FloatProperty(name='Edge Crease', description='Edge crease value', default=1.0, min=0.0, max=1.0)
@@ -74,10 +75,11 @@ class MarkEdgeCrease(bpy.types.Operator):
         obj = bpy.context.active_object
         asa = obj.data.auto_smooth_angle
         md = obj.data
-        key = bm.edges.layers.bevel_weight.verify()
+
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
+            key = bm.edges.layers.crease.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.crease_value
@@ -86,6 +88,7 @@ class MarkEdgeCrease(bpy.types.Operator):
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
+            key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.crease_value
@@ -97,7 +100,7 @@ class MarkEdgeCrease(bpy.types.Operator):
   
 class MarkBewelWeights(bpy.types.Operator):
     bl_idname = "mesh.auto_smooth_mark_bewelweights"
-    bl_label = "Auto Smooth Extras"
+    bl_label = "Mark Bewel Weights"
     bl_description = "Enhances mesh property normals Auto Smooth function with possibility mark Bewel Weight by auto smooth angle"
     bl_options = {"INTERNAL", "UNDO"}
     bevel_weight = FloatProperty(name='Bevel Weight', description='Bevel weight value', default=1.0, min=0.0, max=1.0)
@@ -127,10 +130,10 @@ class MarkBewelWeights(bpy.types.Operator):
         obj = bpy.context.active_object
         asa = obj.data.auto_smooth_angle
         md = obj.data
-        key = bm.edges.layers.bevel_weight.verify()
         if 'OBJECT' in obj.mode:
             bm = bmesh.new()
             bm.from_mesh(md)
+            key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.bevel_weight
@@ -139,6 +142,7 @@ class MarkBewelWeights(bpy.types.Operator):
             
         elif 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(md)
+            key = bm.edges.layers.bevel_weight.verify()
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.bevel_weight
