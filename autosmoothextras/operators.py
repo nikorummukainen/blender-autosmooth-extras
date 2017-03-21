@@ -30,7 +30,8 @@ class MarkSharps(bpy.types.Operator):
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge.smooth = False
-                else :pass            
+                else :pass
+            bm.edges.ensure_lookup_table()             
             bm.to_mesh(md)
             bm.free()
             
@@ -43,7 +44,7 @@ class MarkSharps(bpy.types.Operator):
                 else :pass
             bm.edges.ensure_lookup_table()         
             bmesh.update_edit_mesh(md)
-        
+        md.update()        
         if md.use_auto_smooth is False:
             md.use_auto_smooth = True
         return {"FINISHED"}
@@ -101,9 +102,10 @@ class MarkEdgeCrease(bpy.types.Operator):
             for edge in bm.edges:
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.crease_value
-                else :pass         
+                else :pass
+            bm.edges.ensure_lookup_table() 
             bmesh.update_edit_mesh(md)
-            md.update()
+        md.update()
         return {"FINISHED"}    
   
 class MarkBewelWeights(bpy.types.Operator):
@@ -159,8 +161,9 @@ class MarkBewelWeights(bpy.types.Operator):
                 if edge.calc_face_angle() >= asa:
                     edge[key] = self.bevel_weight
                 else :pass
+            bm.edges.ensure_lookup_table() 
             bmesh.update_edit_mesh(md)
-            md.update()
+        md.update()
         return {"FINISHED"}
       
 if __name__ == '__main__':
